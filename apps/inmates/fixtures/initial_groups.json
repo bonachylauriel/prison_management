@@ -1,0 +1,15 @@
+[
+    {
+        "model": "auth.group",
+        "fields": {
+            "name": "Prison Administrators",
+            "permissions": [
+                ["add_visit", "inmates", "visit"],
+                ["change_visit", "inmates", "visit"],
+                ["delete_visit", "inmates", "visit"],
+                ["view_visit", "inmates", "visit"],
+                ["can_approve_visit", "inmates", "visit"]
+            ]
+        }
+    }
+]

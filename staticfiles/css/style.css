@@ -1,0 +1,60 @@
+/* Custom styles */
+.footer {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    background-color: #f8f9fa;
+    border-top: 1px solid #dee2e6;
+}
+
+/* Add padding to main content to prevent overlap with fixed footer */
+main {
+    padding-bottom: 60px;
+}
+
+/* Navbar customization */
+.navbar {
+    box-shadow: 0 2px 4px rgba(0,0,0,.1);
+}
+
+/* Card customization */
+.card {
+    box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,.075);
+}
+
+/* Table customization */
+.table thead th {
+    background-color: #f8f9fa;
+}
+
+/* Select2 customization */
+.select2-container--bootstrap-5 .select2-selection {
+    height: calc(1.5em + 0.75rem + 2px);
+    padding: 0.375rem 0.75rem;
+}
+
+/* Custom utility classes */
+.cursor-pointer {
+    cursor: pointer;
+}
+
+.bg-light-hover:hover {
+    background-color: #f8f9fa;
+}
+/* Styles pour les badges de statut de visite */
+.bg-planifie {
+    background-color: #ffc107 !important; /* jaune */
+    color: #000;
+}
+.bg-confirme {
+    background-color: #28a745 !important; /* vert */
+    color: #fff;
+}
+.bg-termine {
+    background-color: #17a2b8 !important; /* bleu */
+    color: #fff;
+}
+.bg-annule {
+    background-color: #dc3545 !important; /* rouge */
+    color: #fff;
+}

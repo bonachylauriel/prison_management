@@ -1,0 +1,84 @@
+.inmate-list, .transfer-zone {
+    min-height: 300px;
+    border: 2px dashed #dee2e6;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+    overflow-y: auto;
+    background-color: #f8f9fa;
+}
+
+.transfer-zone {
+    background-color: #fff3cd;
+    border-color: #ffeeba;
+}
+
+.inmate-card {
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    padding: 10px;
+    margin-bottom: 8px;
+    cursor: move;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.inmate-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.inmate-card.is-dragging {
+    opacity: 0.5;
+    background: #e9ecef;
+}
+
+.inmate-card .inmate-number {
+    color: #6c757d;
+    font-size: 0.9em;
+}
+
+.inmate-card .inmate-name {
+    font-weight: 500;
+}
+
+.transfer-zone.drag-active {
+    border-color: #ffc107;
+    background-color: #fff8e5;
+}
+
+.card {
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.alert {
+    margin-bottom: 1rem;
+}
+
+#transferSummary {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 6px;
+    margin-top: 10px;
+}
+
+.capacity-info, .transfer-capacity-info {
+    margin-bottom: 0.5rem;
+}
+
+/* Animations */
+.inmate-card {
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

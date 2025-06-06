@@ -1,0 +1,55 @@
+{% extends "inmates/base_inmates.html" %}
+{% load crispy_forms_tags %}
+
+{% block inmates_content %}
+<div class="card">
+    <div class="card-header">
+        <h3>{% if form.instance.pk %}Modifier{% else %}Nouveau{% endif %} détenu</h3>
+    </div>
+    <div class="card-body">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div class="row">
+                <div class="col-md-6">
+                    {{ form.registration_number|crispy }}
+                    {{ form.first_name|crispy }}
+                    {{ form.last_name|crispy }}
+                    {{ form.date_of_birth|crispy }}
+                    {{ form.gender|crispy }}
+                    {{ form.current_prison|crispy }}
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        {{ form.photo|crispy }}
+                        {% if form.instance.photo %}
+                            <div class="mt-2">
+                                <img src="{{ form.instance.photo.url }}" alt="Photo actuelle" class="img-thumbnail" style="max-width: 200px;">
+                            </div>
+                        {% endif %}
+                    </div>
+                    {{ form.admission_date|crispy }}
+                    {{ form.release_date|crispy }}
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-12">
+                    {{ form.health_status|crispy }}
+                    {{ form.crime_description|crispy }}
+                    {{ form.is_recidivist|crispy }}
+                </div>
+            </div>
+
+            <div class="mt-3">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Enregistrer
+                </button>
+                <a href="{% url 'inmates:inmate_list' %}" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Annuler
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

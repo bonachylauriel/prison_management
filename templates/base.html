@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Système de Gestion Pénitentiaire{% endblock %}</title>
+
+    {% load static %}
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="{% static 'img/favicon.ico' %}" type="image/x-icon">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- FontAwesome -->
+    <link href="{% static 'css/all.min.css' %}" rel="stylesheet">
+    <!-- Vis.js CSS et JS -->
+    <!-- Remplacer les anciennes lignes Vis.js par : -->
+   <link href="https://unpkg.com/vis-network/dist/vis-network.min.css" rel="stylesheet" type="text/css" />
+   <script src="https://unpkg.com/vis-network/dist/vis-network.min.js"></script>
+    <!-- DataTables -->
+    <link href="https://cdn.datatables.net/1.13.5/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+
+    <!-- Select2 -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link href="{% static 'css/style.css' %}" rel="stylesheet">
+
+    {% block extra_css %}{% endblock %}
+<!-- Charts.js pour les statistiques -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- Ajout du style pour les photos -->
+<style>
+    .inmate-photo {
+        object-fit: cover;
+        border-radius: 50%;
+        border: 2px solid #dee2e6;
+    }
+    .inmate-photo-lg {
+        max-width: 300px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+</style>
+
+</head>
+<body>
+    <!-- Navigation -->
+    {% include 'includes/nav.html' %}
+
+    <!-- Messages -->
+    {% include 'includes/messages.html' %}
+
+    <!-- Contenu principal -->
+    <main class="py-4">
+        {% csrf_token %}
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer mt-auto py-3 bg-light">
+        <div class="container text-center">
+            <span class="text-muted">© {% now "Y" %} Système de Gestion Pénitentiaire. Tous droits réservés.</span>
+        </div>
+    </footer>
+
+    <!-- JavaScript Dependencies -->
+    <!-- JQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- DataTables -->
+    <script src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.5/js/dataTables.bootstrap5.min.js"></script>
+
+    <!-- Select2 -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    <!-- Custom JavaScript -->
+    <script src="{% static 'js/main.js' %}"></script>
+    <script src="{% static 'js/messages.js' %}"></script>
+
+    {% block extra_js %}{% endblock %}
+
+    <!-- Initialize Select2 -->
+    <script>
+        $(document).ready(function() {
+            // Initialize Select2 Elements
+            $('.select2').select2({
+                theme: 'bootstrap-5'
+            });
+
+            // Initialize DataTables
+            $('.datatable').DataTable({
+                language: {
+                    url: "//cdn.datatables.net/plug-ins/1.13.5/i18n/fr-FR.json"
+                }
+            });
+        });
+    </script>
+<!-- CSRF Token JavaScript -->
+    <script>
+        // Fonction utilitaire pour obtenir le token CSRF
+        function getCsrfToken() {
+            return document.querySelector('[name=csrfmiddlewaretoken]').value;
+        }
+    </script>
+
+</body>
+</html>

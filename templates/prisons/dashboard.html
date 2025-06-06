@@ -1,0 +1,253 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- En-tête avec filtres -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2>Tableau de Bord Pénitentiaire</h2>
+                <div class="d-flex gap-2">
+                    <select class="form-select" id="provinceFilter">
+                        <option value="">Toutes les provinces</option>
+                        {% for code, name in prison_provinces %}
+                            <option value="{{ code }}">{{ name }}</option>
+                        {% endfor %}
+                    </select>
+                    <select class="form-select" id="periodFilter">
+                        <option value="30">30 jours</option>
+                        <option value="90">3 mois</option>
+                        <option value="180">6 mois</option>
+                        <option value="365">1 an</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistiques globales -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="card-title mb-0">Statistiques Globales du Système Pénitentiaire</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <h4 class="counter">{{ global_stats.total_prisons }}</h4>
+                                <p class="text-muted">Prisons</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <h4 class="counter">{{ global_stats.total_capacity }}</h4>
+                                <p class="text-muted">Capacité Totale</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <h4 class="counter">{{ global_stats.total_population }}</h4>
+                                <p class="text-muted">Population Actuelle</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <h4 class="counter">{{ global_stats.global_occupation_rate|floatformat:1 }}%</h4>
+                                <p class="text-muted">Taux d'Occupation Global</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Graphique global -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">Évolution Globale de la Population</h4>
+                </div>
+                <div class="card-body">
+                    <canvas id="globalChart" height="100"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Grille des prisons -->
+    <div class="row" id="prisonsGrid">
+        {% for prison in prisons %}
+        <div class="col-md-4 mb-4 prison-card" data-province="{{ prison.province }}">
+            <div class="card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div>
+                        <h4 class="card-title mb-0">{{ prison.name }}</h4>
+                        <small class="text-muted">{{ prison.get_province_display }}</small>
+                    </div>
+                    <span class="badge bg-{{ prison.get_occupation_status.1 }}">
+                        {{ prison.get_occupation_status.0 }}
+                    </span>
+                </div>
+                <div class="card-body">
+                    {% with stats=prison.get_statistics %}
+                    <div class="mb-3">
+                        <canvas id="chart-prison-{{ prison.id }}" height="200"></canvas>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <div class="border rounded p-2">
+                                <small class="text-muted d-block">Population</small>
+                                <h5 class="mb-0">{{ stats.total_inmates }} / {{ prison.capacity }}</h5>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="border rounded p-2">
+                                <small class="text-muted d-block">Occupation</small>
+                                <h5 class="mb-0">{{ prison.get_occupation_rate|floatformat:1 }}%</h5>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="border rounded p-2">
+                                <small class="text-muted d-block">H/F</small>
+                                <h5 class="mb-0">{{ stats.male_inmates }}/{{ stats.female_inmates }}</h5>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="border rounded p-2">
+                                <small class="text-muted d-block">Récidivistes</small>
+                                <h5 class="mb-0">{{ stats.recidivists }}</h5>
+                            </div>
+                        </div>
+                    </div>
+                    {% endwith %}
+                </div>
+                <div class="card-footer">
+                    <a href="{% url 'prisons:detail' prison.id %}" class="btn btn-sm btn-primary w-100">
+                        Voir les détails
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Configuration globale des graphiques
+    Chart.defaults.font.family = "'Arial', sans-serif";
+    Chart.defaults.color = '#666';
+
+    // Graphique global
+    const globalCtx = document.getElementById('globalChart').getContext('2d');
+    new Chart(globalCtx, {
+        type: 'line',
+        data: {
+            labels: {{ global_monthly_data|safe }}.map(d => d.date),
+            datasets: [{
+                label: 'Population totale',
+                data: {{ global_monthly_data|safe }}.map(d => d.total),
+                borderColor: 'rgb(75, 192, 192)',
+                backgroundColor: 'rgba(75, 192, 192, 0.1)',
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                title: {
+                    display: true,
+                    text: 'Évolution de la population carcérale totale'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    // Graphiques des prisons individuelles
+    {% for prison in prisons %}
+    new Chart(document.getElementById('chart-prison-{{ prison.id }}').getContext('2d'), {
+        type: 'line',
+        data: {
+            labels: {{ prison.get_monthly_population_data|safe }}.map(d => d.date),
+            datasets: [{
+                label: 'Population',
+                data: {{ prison.get_monthly_population_data|safe }}.map(d => d.count),
+                borderColor: 'rgb(75, 192, 192)',
+                backgroundColor: 'rgba(75, 192, 192, 0.1)',
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+    {% endfor %}
+
+    // Filtrage par province
+    const provinceFilter = document.getElementById('provinceFilter');
+    const prisonsGrid = document.getElementById('prisonsGrid');
+
+    provinceFilter.addEventListener('change', function() {
+        const selectedProvince = this.value;
+        const prisonCards = document.querySelectorAll('.prison-card');
+
+        prisonCards.forEach(card => {
+            if (!selectedProvince || card.dataset.province === selectedProvince) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    });
+
+    // Animation des compteurs
+    const counters = document.querySelectorAll('.counter');
+    counters.forEach(counter => {
+        const target = parseFloat(counter.innerText);
+        const increment = target / 50;
+        let current = 0;
+
+        const updateCounter = () => {
+            if (current < target) {
+                current += increment;
+                counter.innerText = current.toFixed(1);
+                requestAnimationFrame(updateCounter);
+            } else {
+                counter.innerText = target;
+            }
+        };
+
+        updateCounter();
+    });
+});
+</script>
+{% endblock %}
+{% endblock %}

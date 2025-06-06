@@ -1,0 +1,108 @@
+{% extends "inmates/base_inmates.html" %}
+{% block inmates_content %}
+<div class="row mb-4">
+    <div class="col">
+        <h2>Liste des détenus</h2>
+    </div>
+    <div class="col text-end">
+        <a href="{% url 'inmates:inmate_create' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Nouveau détenu
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <table class="table table-striped datatable">
+                    <thead>
+                        <tr>
+                            <th>Photo</th>
+                            <th>Numéro d'écrou</th>
+                            <th>Nom</th>
+                            <th>Prison</th>
+                            <th>Date d'admission</th>
+                            <th>Statut</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for inmate in inmates %}
+                        <tr>
+                            <td>
+                                {% if inmate.photo %}
+                                    <img src="{{ inmate.photo.url }}" alt="Photo" width="50" height="50" class="inmate-photo">
+                                {% else %}
+                                    <div class="inmate-photo bg-secondary text-white d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                {% endif %}
+                            </td>
+                            <td>{{ inmate.registration_number }}</td>
+                            <td>{{ inmate.first_name }} {{ inmate.last_name }}</td>
+                            <td>
+                                <span class="badge bg-info">{{ inmate.current_prison }}</span>
+                            </td>
+                            <td>{{ inmate.admission_date|date:"d/m/Y" }}</td>
+                            <td>
+                                {% if inmate.release_date %}
+                                    {% if inmate.release_date|date:'Y-m-d' < now|date:'Y-m-d' %}
+                                        <span class="badge bg-success">Libéré</span>
+                                    {% else %}
+                                        <span class="badge bg-warning">En détention</span>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="badge bg-danger">Durée indéterminée</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="btn-group">
+                                    <a href="{% url 'inmates:inmate_detail' inmate.pk %}" class="btn btn-info btn-sm" title="Voir">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{% url 'inmates:inmate_update' inmate.pk %}" class="btn btn-warning btn-sm" title="Modifier">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="{% url 'inmates:inmate_delete' inmate.pk %}" class="btn btn-danger btn-sm" title="Supprimer">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center">Aucun détenu enregistré</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if is_paginated %}
+<nav aria-label="Page navigation">
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Précédent</a>
+        </li>
+        {% endif %}
+
+        {% for num in page_obj.paginator.page_range %}
+        <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+            <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+        </li>
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}">Suivant</a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}

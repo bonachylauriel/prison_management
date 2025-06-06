@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header">
+            <h3>{{ guard.get_full_name }}</h3>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4">
+                    {% if guard.photo %}
+                    <img src="{{ guard.photo.url }}" alt="Photo de {{ guard.get_full_name }}" class="img-fluid rounded">
+                    {% endif %}
+                </div>
+                <div class="col-md-8">
+                    <dl class="row">
+                        <dt class="col-sm-4">Numéro de badge</dt>
+                        <dd class="col-sm-8">{{ guard.badge_number }}</dd>
+
+                        <dt class="col-sm-4">Grade</dt>
+                        <dd class="col-sm-8">{{ guard.get_rank_display }}</dd>
+
+                        <dt class="col-sm-4">Prison assignée</dt>
+                        <dd class="col-sm-8">{{ guard.prison }}</dd>
+
+                        <dt class="col-sm-4">Téléphone</dt>
+                        <dd class="col-sm-8">{{ guard.phone }}</dd>
+
+                        <dt class="col-sm-4">Email</dt>
+                        <dd class="col-sm-8">{{ guard.email }}</dd>
+
+                        <dt class="col-sm-4">Date d'embauche</dt>
+                        <dd class="col-sm-8">{{ guard.hire_date }}</dd>
+
+                        <dt class="col-sm-4">Statut</dt>
+                        <dd class="col-sm-8">
+                            <span class="badge {% if guard.is_on_duty %}badge-success{% else %}badge-secondary{% endif %}">
+                                {{ guard.is_on_duty|yesno:"En service,Hors service" }}
+                            </span>
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+
+            <h4 class="mt-4">Services actuels</h4>
+            {% if current_shifts %}
+            <div class="table-responsive">
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Début</th>
+                            <th>Fin</th>
+                            <th>Zone</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for shift in current_shifts %}
+                        <tr>
+                            <td>{{ shift.start_time }}</td>
+                            <td>{{ shift.end_time }}</td>
+                            <td>{{ shift.area }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p>Aucun service en cours.</p>
+            {% endif %}
+        </div>
+        <div class="card-footer">
+            {% if perms.guards.change_user %}
+            <a href="{% url 'guard_update' guard.pk %}" class="btn btn-warning">
+                <i class="fas fa-edit"></i> Modifier
+            </a>
+            {% endif %}
+            <a href="{% url 'guard_list' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Retour
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends "inmates/base_inmates.html" %}
+
+{% block inmates_content %}
+<div class="card">
+    <div class="card-header">
+        <h3>Confirmer la suppression</h3>
+    </div>
+    <div class="card-body">
+        <p class="alert alert-danger">
+            Êtes-vous sûr de vouloir supprimer le détenu :
+            <strong>{{ object.registration_number }} - {{ object.first_name }} {{ object.last_name }}</strong> ?
+        </p>
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">
+                <i class="fas fa-trash"></i> Confirmer la suppression
+            </button>
+            <a href="{% url 'inmates:inmate_detail' object.pk %}" class="btn btn-secondary">
+                <i class="fas fa-times"></i> Annuler
+            </a>
+        </form>
+    </div>
+</div>
+{% endblock %}

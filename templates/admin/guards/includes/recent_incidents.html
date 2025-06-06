@@ -1,0 +1,38 @@
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Titre</th>
+                <th>Statut</th>
+                <th>Gravité</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for incident in recent_incidents %}
+            <tr>
+                <td>{{ incident.incident_date|date:"d/m/Y H:i" }}</td>
+                <td>
+                    <a href="{% url 'admin:guards_incidentreport_change' incident.id %}">
+                        {{ incident.title }}
+                    </a>
+                </td>
+                <td>
+                    <span class="badge badge-{{ incident.status|lower }}">
+                        {{ incident.get_status_display }}
+                    </span>
+                </td>
+                <td>
+                    <span class="badge badge-{{ incident.severity|lower }}">
+                        {{ incident.get_severity_display }}
+                    </span>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" class="text-center">Aucun incident récent</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

@@ -1,0 +1,46 @@
+<div class="row">
+    <div class="col-md-3">
+        <div class="info-box">
+            <span class="info-box-icon bg-info">
+                <i class="fas fa-user-shield"></i>
+            </span>
+            <div class="info-box-content">
+                <span class="info-box-text">Gardes totaux</span>
+                <span class="info-box-number">{{ guards_count }}</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="info-box">
+            <span class="info-box-icon bg-success">
+                <i class="fas fa-clock"></i>
+            </span>
+            <div class="info-box-content">
+                <span class="info-box-text">En service</span>
+                <span class="info-box-number">{{ on_duty_count }}</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="info-box">
+            <span class="info-box-icon bg-warning">
+                <i class="fas fa-exclamation-triangle"></i>
+            </span>
+            <div class="info-box-content">
+                <span class="info-box-text">Incidents ouverts</span>
+                <span class="info-box-number">{{ incidents_open }}</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="info-box">
+            <span class="info-box-icon bg-primary">
+                <i class="fas fa-users"></i>
+            </span>
+            <div class="info-box-content">
+                <span class="info-box-text">Équipes actives</span>
+                <span class="info-box-number">{{ teams_active }}</span>
+            </div>
+        </div>
+    </div>
+</div>

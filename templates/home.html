@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block title %}Accueil - Gestion Prison{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>Bienvenue dans le système de gestion pénitentiaire</h1>
+
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Détenus</h5>
+                    <p class="card-text">Gérer les informations des détenus</p>
+                    <a href="{% url 'inmates:inmate_list' %}" class="btn btn-primary">Accéder</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Gardiens</h5>
+                    <p class="card-text">Gérer le personnel de sécurité</p>
+                    <a href="{% url 'guards:guard_list' %}" class="btn btn-primary">Accéder</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Incidents</h5>
+                    <p class="card-text">Consulter les rapports d'incidents</p>
+                    <a href="{% url 'guards:incident_list' %}" class="btn btn-primary">Accéder</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

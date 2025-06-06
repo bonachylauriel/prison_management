@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Équipes</h2>
+        {% if perms.guards.add_teamunit %}
+        <a href="{% url 'guards:team_create' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Nouvelle Équipe
+        </a>
+        {% endif %}
+    </div>
+
+    <div class="row">
+        {% for team in teams %}
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">{{ team.name }}</h5>
+                    {% if team.is_active %}
+                    <span class="badge badge-success">Active</span>
+                    {% else %}
+                    <span class="badge badge-secondary">Inactive</span>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    <p><strong>Chef d'équipe:</strong> {{ team.leader.get_full_name }}</p>
+                    <p><strong>Membres:</strong> {{ team.members.count }}</p>
+                    <div class="mt-3">
+                        {% if perms.guards.change_teamunit %}
+                        <a href="{% url 'guards:team_update' team.pk %}"
+                           class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-edit"></i> Modifier
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="alert alert-info">Aucune équipe trouvée</div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if is_paginated %}
+    <nav aria-label="Page navigation" class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Précédent</a>
+            </li>
+            {% endif %}
+
+            <li class="page-item active">
+                <span class="page-link">Page {{ page_obj.number }} sur {{ page_obj.paginator.num_pages }}</span>
+            </li>
+
+            {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}">Suivant</a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+{% endblock %}

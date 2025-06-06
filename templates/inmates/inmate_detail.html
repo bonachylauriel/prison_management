@@ -1,0 +1,212 @@
+{% extends "inmates/base_inmates.html" %}
+
+{% block inmates_content %}
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h3>Détails du détenu</h3>
+        <div>
+            <a href="{% url 'inmates:inmate_update' inmate.pk %}" class="btn btn-warning">
+                <i class="fas fa-edit"></i> Modifier
+            </a>
+            <a href="{% url 'inmates:inmate_list' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Retour
+            </a>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-4 text-center mb-3">
+                {% if inmate.photo %}
+                    <img src="{{ inmate.photo.url }}" alt="Photo du détenu" class="img-fluid rounded mb-3" style="max-width: 300px;">
+                {% else %}
+                    <div class="alert alert-info">Aucune photo disponible</div>
+                {% endif %}
+            </div>
+            <div class="col-md-8">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h4>Informations personnelles</h4>
+                        <table class="table">
+                            <tr>
+                                <th>Numéro d'écrou :</th>
+                                <td>{{ inmate.registration_number }}</td>
+                            </tr>
+                            <tr>
+                                <th>Nom complet :</th>
+                                <td>{{ inmate.first_name }} {{ inmate.last_name }}</td>
+                            </tr>
+                            <tr>
+                                <th>Date de naissance :</th>
+                                <td>{{ inmate.date_of_birth|date:"d/m/Y" }}</td>
+                            </tr>
+                            <tr>
+                                <th>Genre :</th>
+                                <td>{{ inmate.get_gender_display }}</td>
+                            </tr>
+                            <tr>
+                                <th>Récidiviste :</th>
+                                <td>
+                                    {% if inmate.is_recidivist %}
+                                        <span class="badge bg-danger">Oui</span>
+                                    {% else %}
+                                        <span class="badge bg-success">Non</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <h4>Informations de détention</h4>
+                        <table class="table">
+                            <tr>
+                                <th>Prison actuelle :</th>
+                                <td>{{ inmate.current_prison }}</td>
+                            </tr>
+                            <tr>
+                                <th>Date d'admission :</th>
+                                <td>{{ inmate.admission_date|date:"d/m/Y H:i" }}</td>
+                            </tr>
+                            <tr>
+                                <th>Date de libération :</th>
+                                <td>
+                                    {% if inmate.release_date %}
+                                        {{ inmate.release_date|date:"d/m/Y H:i" }}
+                                    {% else %}
+                                        <span class="text-muted">Non définie</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <h4>État de santé</h4>
+                    <div class="card">
+                        <div class="card-body">
+                            {{ inmate.health_status|linebreaks }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <h4>Description du crime</h4>
+                    <div class="card">
+                        <div class="card-body">
+                            {{ inmate.crime_description|linebreaks }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <h4>Historique des détentions</h4>
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Date de début</th>
+                                    <th>Date de fin</th>
+                                    <th>Magistrat</th>
+                                    <th>Mandat</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for detention in inmate.detention_set.all %}
+                                <tr>
+                                    <td>{{ detention.start_date|date:"d/m/Y H:i" }}</td>
+                                    <td>
+                                        {% if detention.end_date %}
+                                            {{ detention.end_date|date:"d/m/Y H:i" }}
+                                        {% else %}
+                                            <span class="text-muted">En cours</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ detention.magistrate }}</td>
+                                    <td>
+                                        {% if detention.warrant_pdf %}
+                                            <a href="{{ detention.warrant_pdf.url }}" target="_blank" class="btn btn-sm btn-info">
+                                                <i class="fas fa-file-pdf"></i> Voir
+                                            </a>
+                                        {% else %}
+                                            <span class="text-muted">Non disponible</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center">Aucune détention enregistrée</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+<!-- Statistiques du détenu -->
+<div class="card mt-4">
+    <div class="card-header">
+        <h4>Statistiques de détention</h4>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <canvas id="detentionChart"></canvas>
+            </div>
+            <div class="col-md-6">
+                <div class="stats-summary">
+                    <h5>Résumé</h5>
+                    <ul class="list-group">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Nombre total de détentions
+                            <span class="badge bg-primary rounded-pill">{{ inmate.detention_set.count }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Durée totale de détention
+                            <span class="badge bg-info rounded-pill">
+                                {% with total_days=inmate.get_total_detention_days %}
+                                    {{ total_days }} jours
+                                {% endwith %}
+                            </span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('detentionChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: [{% for detention in inmate.detention_set.all %}'Détention {{ forloop.counter }}',{% endfor %}],
+            datasets: [{
+                label: 'Durée de détention (jours)',
+                data: [
+                    {% for detention in inmate.detention_set.all %}
+                        {{ detention.get_duration_days }},
+                    {% endfor %}
+                ],
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

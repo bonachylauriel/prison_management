@@ -1,0 +1,12 @@
+# Base Django
+# Pour les graphiques et le dashboard
+chart.js==4.3.0  # Via npm ou CDN
+# Pour l'export de données
+
+# Pour le traitement des dates
+python-dateutil>=2.8.2
+
+# Pour les notifications temps réel (optionnel)
+
+# Pour la sécurité
+django-security>=0.15.0

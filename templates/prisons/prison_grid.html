@@ -1,0 +1,246 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Vue d'ensemble des Prisons{% endblock %}
+
+{% block extra_css %}
+<style>
+    .prison-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.5rem;
+        padding: 1.5rem;
+    }
+
+    .prison-card {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: transform 0.2s, box-shadow 0.2s;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .prison-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .prison-card-header {
+        background: linear-gradient(45deg, #1a237e, #283593);
+        color: white;
+        padding: 1rem;
+        border-radius: 10px 10px 0 0;
+    }
+
+    .prison-icon {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .prison-status {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        width: 15px;
+        height: 15px;
+        border-radius: 50%;
+    }
+
+    .status-normal { background-color: #4caf50; }
+    .status-warning { background-color: #ff9800; }
+    .status-critical { background-color: #f44336; }
+
+    .prison-card-body {
+        padding: 1.5rem;
+    }
+
+    .prison-stats {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .stat-item {
+        text-align: center;
+        padding: 0.5rem;
+        background: #f5f5f5;
+        border-radius: 5px;
+    }
+
+    .stat-value {
+        font-size: 1.25rem;
+        font-weight: bold;
+        color: #1a237e;
+    }
+
+    .stat-label {
+        font-size: 0.875rem;
+        color: #666;
+    }
+
+    .prison-footer {
+        border-top: 1px solid #eee;
+        padding: 1rem;
+        text-align: right;
+    }
+
+    .province-badge {
+        position: absolute;
+        top: 1rem;
+        left: 1rem;
+        background: rgba(255, 255, 255, 0.2);
+        padding: 0.25rem 0.75rem;
+        border-radius: 15px;
+        font-size: 0.875rem;
+    }
+
+    .filters-section {
+        background: white;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .search-box {
+        position: relative;
+    }
+
+    .search-box i {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #666;
+    }
+
+    .search-input {
+        padding-left: 2.5rem;
+        border-radius: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- En-tête avec filtres -->
+    <div class="filters-section">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <h2 class="mb-0">
+                    <i class="fas fa-building me-2"></i>
+                    Vue d'ensemble des Prisons
+                </h2>
+            </div>
+            <div class="col-md-3">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="prisonSearch" class="form-control search-input"
+                           placeholder="Rechercher une prison...">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <select id="provinceFilter" class="form-select">
+                    <option value="">Toutes les provinces</option>
+                    {% for code, name in provinces.items %}
+                        <option value="{{ code }}">{{ name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Grille des prisons -->
+    <div class="prison-grid">
+        {% for prison in prisons %}
+        <div class="prison-card" data-province="{{ prison.province }}">
+            <div class="prison-card-header">
+                <span class="province-badge">{{ prison.get_province_display }}</span>
+                <div class="prison-status status-{{ prison.get_occupation_status }}"></div>
+                <div class="text-center">
+                    <div class="prison-icon">
+                        <i class="fas fa-building"></i>
+                    </div>
+                    <h4 class="mb-0">{{ prison.name }}</h4>
+                </div>
+            </div>
+            <div class="prison-card-body">
+                <div class="prison-stats">
+                    <div class="stat-item">
+                        <div class="stat-value">{{ prison.current_population }}</div>
+                        <div class="stat-label">Détenus</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">{{ prison.capacity }}</div>
+                        <div class="stat-label">Capacité</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">{{ prison.get_occupation_rate|floatformat:1 }}%</div>
+                        <div class="stat-label">Occupation</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">{{ prison.staff_count }}</div>
+                        <div class="stat-label">Personnel</div>
+                    </div>
+                </div>
+            </div>
+            <div class="prison-footer">
+                <a href="{% url 'prisons:detail' prison.id %}" class="btn btn-sm btn-primary">
+                    <i class="fas fa-info-circle me-1"></i>
+                    Détails
+                </a>
+                {% if perms.prisons.change_prison %}
+                <a href="{% url 'prisons:update' prison.id %}" class="btn btn-sm btn-secondary">
+                    <i class="fas fa-edit me-1"></i>
+                    Modifier
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const prisonSearch = document.getElementById('prisonSearch');
+    const provinceFilter = document.getElementById('provinceFilter');
+    const prisonCards = document.querySelectorAll('.prison-card');
+
+    function filterPrisons() {
+        const searchTerm = prisonSearch.value.toLowerCase();
+        const selectedProvince = provinceFilter.value;
+
+        prisonCards.forEach(card => {
+            const prisonName = card.querySelector('h4').textContent.toLowerCase();
+            const prisonProvince = card.dataset.province;
+            const matchesSearch = prisonName.includes(searchTerm);
+            const matchesProvince = !selectedProvince || prisonProvince === selectedProvince;
+
+            if (matchesSearch && matchesProvince) {
+                card.style.display = '';
+                // Animation à l'apparition
+                card.style.opacity = '0';
+                setTimeout(() => card.style.opacity = '1', 50);
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    }
+
+    prisonSearch.addEventListener('input', filterPrisons);
+    provinceFilter.addEventListener('change', filterPrisons);
+
+    // Animation initiale
+    prisonCards.forEach((card, index) => {
+        card.style.opacity = '0';
+        setTimeout(() => card.style.opacity = '1', index * 100);
+    });
+});
+</script>
+{% endblock %}

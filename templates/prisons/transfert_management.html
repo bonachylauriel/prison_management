@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/transfer.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h2>
+                <i class="fas fa-exchange-alt me-2"></i>
+                Gestion des Transferts de Détenus
+            </h2>
+        </div>
+    </div>
+
+    {% include 'components/messages.html' %}
+
+    <div class="row">
+        <!-- Prison source -->
+        <div class="col-md-4">
+            <div class="card border-primary h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-building me-2"></i>
+                        Prison Source
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <select id="sourcePrison" class="form-select mb-3">
+                        <option value="">Sélectionnez une prison</option>
+                        {% for prison in prisons %}
+                        <option value="{{ prison.id }}">{{ prison.name }} ({{ prison.get_province_display }})</option>
+                        {% endfor %}
+                    </select>
+
+                    <div class="alert alert-info source-info d-none">
+                        <span id="sourceCapacity"></span>
+                    </div>
+
+                    <div id="sourceInmates" class="inmate-list">
+                        <div class="text-center text-muted py-4">
+                            <i class="fas fa-info-circle mb-2"></i>
+                            <p>Sélectionnez une prison pour voir les détenus</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Zone de transfert -->
+        <div class="col-md-4">
+            <div class="card border-warning h-100">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">
+                        <i class="fas fa-people-carry me-2"></i>
+                        Détenus à Transférer
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="transferZone" class="transfer-zone">
+                        <div class="text-center text-muted py-4">
+                            <i class="fas fa-arrows-alt mb-2"></i>
+                            <p>Glissez les détenus ici</p>
+                        </div>
+                    </div>
+
+                    <div class="mt-3">
+                        <button id="processTransfer" class="btn btn-warning w-100" disabled>
+                            <i class="fas fa-truck me-2"></i>
+                            Effectuer le Transfert
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Prison destination -->
+        <div class="col-md-4">
+            <div class="card border-success h-100">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-building me-2"></i>
+                        Prison Destination
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <select id="destinationPrison" class="form-select mb-3" disabled>
+                        <option value="">Sélectionnez une prison</option>
+                    </select>
+
+                    <div id="transferInfo" class="alert alert-info d-none">
+                        <div class="capacity-info"></div>
+                        <div class="transfer-capacity-info"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de confirmation -->
+<div class="modal fade" id="confirmTransferModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirmer le transfert</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Êtes-vous sûr de vouloir transférer les détenus sélectionnés ?</p>
+                <div id="transferSummary"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-warning" id="confirmTransferBtn">
+                    <i class="fas fa-check me-2"></i>
+                    Confirmer le transfert
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.14.0/Sortable.min.js"></script>
+<script src="{% static 'js/transfer.js' %}"></script>
+{% endblock %}
