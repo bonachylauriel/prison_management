@@ -1,4 +1,12 @@
+
 {% extends 'base.html' %}
+{% load static %}
+
+{% block extrahead %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vis-network@9.1.2/styles/vis-network.min.css">
+<script src="https://cdn.jsdelivr.net/npm/vis-network@9.1.2/dist/vis-network.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+{% endblock %}
 
 {% block content %}
 <div class="container">
@@ -7,7 +15,7 @@
     <div class="row mb-3">
         <div class="col-md-4">
             <select id="prisonSelector" class="form-select">
-                <option value="">Toutes les prisons</option>
+                <option value="all">Toutes les prisons</option>
                 {% for prison in prisons %}
                     <option value="{{ prison.id }}">{{ prison.name }}</option>
                 {% endfor %}
@@ -23,7 +31,11 @@
         </div>
     </div>
 
-    <div id="visitNetwork" style="height: 700px; border: 1px solid #ddd; background-color: #f8f9fa;"></div>
+    <div class="card">
+        <div class="card-body">
+            <div id="visitNetwork" style="height: 700px;"></div>
+        </div>
+    </div>
 
     <div class="mt-3">
         <div class="d-flex justify-content-between">
@@ -35,141 +47,146 @@
 </div>
 
 <script type="text/javascript">
-    const container = document.getElementById('visitNetwork');
+    document.addEventListener('DOMContentLoaded', function() {
+        const container = document.getElementById('visitNetwork');
 
-    const options = {
-        nodes: {
-            shape: 'dot',
-            scaling: {
-                min: 10,
-                max: 30,
-                label: {
-                    enabled: true,
-                    min: 14,
+        const options = {
+            nodes: {
+                shape: 'dot',
+                scaling: {
+                    min: 10,
                     max: 30,
-                    maxVisible: 30,
-                    drawThreshold: 5
+                    label: {
+                        enabled: true,
+                        min: 14,
+                        max: 30,
+                        maxVisible: 30,
+                        drawThreshold: 5
+                    }
+                },
+                font: {
+                    size: 14,
+                    face: 'Arial'
+                },
+                borderWidth: 2,
+                shadow: true
+            },
+            edges: {
+                width: 2,
+                color: {
+                    color: '#2B7CE9',
+                    highlight: '#FFA500',
+                    hover: '#848484'
+                },
+                arrows: {
+                    to: {
+                        enabled: true,
+                        scaleFactor: 0.5
+                    }
+                },
+                smooth: {
+                    type: 'continuous'
                 }
             },
-            font: {
-                size: 14,
-                face: 'Arial'
-            },
-            borderWidth: 2,
-            shadow: true
-        },
-        edges: {
-            width: 2,
-            color: {
-                color: '#2B7CE9',
-                highlight: '#FFA500',
-                hover: '#848484'
-            },
-            arrows: {
-                to: {
-                    enabled: true,
-                    scaleFactor: 0.5
+            physics: {
+                stabilization: {
+                    iterations: 100,
+                    fit: true
+                },
+                barnesHut: {
+                    gravitationalConstant: -2000,
+                    springConstant: 0.04,
+                    springLength: 200
                 }
             },
-            smooth: {
-                type: 'continuous'
-            }
-        },
-        physics: {
-            stabilization: {
-                iterations: 100,
-                fit: true
+            interaction: {
+                tooltipDelay: 200,
+                hover: true,
+                zoomView: true,
+                dragView: true,
+                navigationButtons: true
             },
-            barnesHut: {
-                gravitationalConstant: -2000,
-                springConstant: 0.04,
-                springLength: 200
+            groups: {
+                inmates: {
+                    color: {background: '#FF4444', border: '#CC0000'},
+                    shape: 'dot'
+                },
+                visitors: {
+                    color: {background: '#4CAF50', border: '#2E7D32'},
+                    shape: 'triangle'
+                },
+                prison: {
+                    color: {background: '#6E6EFD', border: '#5252E0'},
+                    shape: 'diamond'
+                }
             }
-        },
-        interaction: {
-            tooltipDelay: 200,
-            hover: true,
-            zoomView: true,
-            dragView: true,
-            navigationButtons: true
-        },
-        groups: {
-            inmates: {
-                color: '#FF4444',
-                shape: 'dot'
-            },
-            visitors: {
-                color: '#4CAF50',
-                shape: 'triangle'
-            }
+        };
+
+        let network = new vis.Network(container, { nodes: new vis.DataSet(), edges: new vis.DataSet() }, options);
+
+        function loadNetworkData(prisonId = 'all', timeframe = 'all') {
+            const url = `/inmates/visits/network/data/${prisonId}/?timeframe=${timeframe}`;
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    network.setData({
+                        nodes: new vis.DataSet(data.nodes),
+                        edges: new vis.DataSet(data.edges)
+                    });
+                })
+                .catch(error => console.error('Erreur:', error));
         }
-    };
 
-    let network = new vis.Network(container, { nodes: new vis.DataSet(), edges: new vis.DataSet() }, options);
+        // Événements pour les contrôles
+        document.getElementById('prisonSelector').addEventListener('change', function(e) {
+            loadNetworkData(e.target.value, document.getElementById('timeframeSelector').value);
+        });
 
-    function loadNetworkData(prisonId = '', timeframe = 'all') {
-        const url = `/inmates/visits/network/data/${prisonId}/?timeframe=${timeframe}`;
+        document.getElementById('timeframeSelector').addEventListener('change', function(e) {
+            loadNetworkData(document.getElementById('prisonSelector').value, e.target.value);
+        });
 
-        fetch(url)
-            .then(response => response.json())
-            .then(data => {
-                const nodes = new vis.DataSet(data.nodes);
-                const edges = new vis.DataSet(data.edges);
-                network.setData({nodes: nodes, edges: edges});
-            })
-            .catch(error => console.error('Erreur:', error));
-    }
+        document.getElementById('zoomIn').addEventListener('click', function() {
+            network.zoom(1.2);
+        });
 
-    // Événements pour les contrôles
-    document.getElementById('prisonSelector').addEventListener('change', function(e) {
-        loadNetworkData(e.target.value, document.getElementById('timeframeSelector').value);
-    });
+        document.getElementById('zoomOut').addEventListener('click', function() {
+            network.zoom(0.8);
+        });
 
-    document.getElementById('timeframeSelector').addEventListener('change', function(e) {
-        loadNetworkData(document.getElementById('prisonSelector').value, e.target.value);
-    });
+        document.getElementById('centerGraph').addEventListener('click', function() {
+            network.fit();
+        });
 
-    document.getElementById('zoomIn').addEventListener('click', function() {
-        network.zoom(1.2);
-    });
-
-    document.getElementById('zoomOut').addEventListener('click', function() {
-        network.zoom(0.8);
-    });
-
-    document.getElementById('centerGraph').addEventListener('click', function() {
-        network.fit();
-    });
-
-    network.on('click', function(params) {
-        if (params.nodes.length > 0) {
-            const nodeId = params.nodes[0];
-            if (nodeId.startsWith('inmate_')) {
-                const inmateId = nodeId.split('_')[1];
-                window.location.href = `/inmates/${inmateId}/`;
+        network.on('click', function(params) {
+            if (params.nodes.length > 0) {
+                const nodeId = params.nodes[0];
+                if (nodeId.startsWith('inmate_')) {
+                    const inmateId = nodeId.split('_')[1];
+                    window.location.href = `/inmates/${inmateId}/`;
+                }
             }
-        }
-    });
+        });
 
-    // Chargement initial
-    loadNetworkData();
+        // Chargement initial
+        loadNetworkData();
 
-    // Ajout d'animations et d'effets visuels
-    network.on("stabilizationProgress", function(params) {
-        // Vous pouvez ajouter une barre de progression ici si nécessaire
-    });
+        network.on("stabilizationProgress", function(params) {
+            // Animation de chargement si nécessaire
+        });
 
-    network.on("stabilizationIterationsDone", function() {
-        network.setOptions( { physics: false } );
-    });
+        network.on("stabilizationIterationsDone", function() {
+            network.setOptions({ physics: false });
+        });
 
-    // Effet de survol
-    network.on("hoverNode", function(params) {
-        container.style.cursor = 'pointer';
-    });
+        network.on("hoverNode", function(params) {
+            container.style.cursor = 'pointer';
+        });
 
-    network.on("blurNode", function(params) {
-        container.style.cursor = 'default';
+        network.on("blurNode", function(params) {
+            container.style.cursor = 'default';
+        });
     });
 </script>
 {% endblock %}

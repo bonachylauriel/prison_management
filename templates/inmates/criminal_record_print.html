@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Casier Judiciaire - {{ inmate.first_name }} {{ inmate.last_name }}</title>
+    <style>
+        @media print {
+            @page {
+                size: A4;
+                margin: 2cm;
+            }
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #000;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #000;
+            padding-bottom: 20px;
+        }
+
+        .prison-name {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .document-title {
+            font-size: 28px;
+            font-weight: bold;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 5px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        th, td {
+            border: 1px solid #333;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f0f0f0;
+            font-weight: bold;
+            width: 200px;
+        }
+
+        .inmate-photo {
+            text-align: right;
+            margin-bottom: 20px;
+        }
+
+        .inmate-photo img {
+            max-width: 150px;
+            border: 1px solid #333;
+        }
+
+        .footer {
+            margin-top: 50px;
+            text-align: center;
+            font-size: 14px;
+            border-top: 1px solid #333;
+            padding-top: 20px;
+        }
+
+        .signature-section {
+            margin-top: 50px;
+            page-break-inside: avoid;
+        }
+
+        .signature-box {
+            border-top: 1px solid #333;
+            width: 200px;
+            margin-top: 80px;
+            text-align: center;
+            float: right;
+        }
+
+        .clearfix::after {
+            content: "";
+            clear: both;
+            display: table;
+        }
+
+        .badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .badge-success {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .badge-warning {
+            background-color: #ffc107;
+            color: black;
+        }
+
+        .header-info {
+            text-align: right;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="prison-name">
+            {{ prison.name }}
+        </div>
+        <div>{{ prison.address }}</div>
+        <div>{{ prison.city }}, {{ prison.country }}</div>
+    </div>
+
+    <div class="header-info">
+        Date d'émission : {{ current_date|date:"d/m/Y" }}<br>
+        Référence : CJ-{{ inmate.registration_number }}
+    </div>
+
+    <h1 class="document-title">CASIER JUDICIAIRE</h1>
+
+    <div class="section">
+        <h2 class="section-title">Informations personnelles</h2>
+        <div style="display: flex; justify-content: space-between;">
+            <table style="width: 70%;">
+                <tr>
+                    <th>Numéro d'écrou</th>
+                    <td>{{ inmate.registration_number }}</td>
+                </tr>
+                <tr>
+                    <th>Nom</th>
+                    <td>{{ inmate.last_name }}</td>
+                </tr>
+                <tr>
+                    <th>Prénom</th>
+                    <td>{{ inmate.first_name }}</td>
+                </tr>
+                <tr>
+                    <th>Date de naissance</th>
+                    <td>{{ inmate.birth_date|date:"d/m/Y" }}</td>
+                </tr>
+                <tr>
+                    <th>Nationalité</th>
+                    <td>{{ inmate.nationality }}</td>
+                </tr>
+            </table>
+            {% if inmate.photo %}
+            <div class="inmate-photo">
+                <img src="{{ inmate.photo.url }}" alt="Photo du détenu">
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="section">
+        <h2 class="section-title">Historique des détentions</h2>
+        {% if detentions %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Prison</th>
+                    <th>Date d'entrée</th>
+                    <th>Date de sortie</th>
+                    <th>Motif</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for detention in detentions %}
+                <tr>
+                    <td>{{ detention.prison.name }}</td>
+                    <td>{{ detention.start_date|date:"d/m/Y" }}</td>
+                    <td>
+                        {% if detention.end_date %}
+                            {{ detention.end_date|date:"d/m/Y" }}
+                        {% else %}
+                            En cours
+                        {% endif %}
+                    </td>
+                    <td>{{ detention.reason }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>Aucune détention enregistrée pour ce détenu.</p>
+        {% endif %}
+    </div>
+
+    <div class="section">
+        <h2 class="section-title">Informations complémentaires</h2>
+        <table>
+            <tr>
+                <th>État de santé</th>
+                <td>{{ inmate.health_status }}</td>
+            </tr>
+            <tr>
+                <th>Récidiviste</th>
+                <td>
+                    {% if inmate.is_recidivist %}
+                        Oui
+                    {% else %}
+                        Non
+                    {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <th>Description du crime</th>
+                <td>{{ inmate.crime_description }}</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="signature-section clearfix">
+        <div class="signature-box">
+            Signature et cachet<br>
+            du Directeur
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>Document officiel - {{ prison.name }}</p>
+        <p>Généré le {{ current_date|date:"d/m/Y à H:i" }}</p>
+    </div>
+</body>
+</html>

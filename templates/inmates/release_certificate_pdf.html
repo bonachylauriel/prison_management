@@ -1,0 +1,182 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Certificat de Libération - {{ detention.inmate.first_name }} {{ detention.inmate.last_name }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4 mb-4">
+    <div class="card">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h2 class="mb-0">Certificat de Libération</h2>
+            <div>
+                <a href="{% url 'inmates:release_certificate_pdf' detention.pk %}" class="btn btn-light">
+                    <i class="fas fa-file-pdf"></i> Télécharger PDF
+                </a>
+                <a href="{% url 'inmates:release_certificate_print' detention.pk %}" class="btn btn-light" target="_blank">
+                    <i class="fas fa-print"></i> Imprimer
+                </a>
+            </div>
+        </div>
+
+        <div class="card-body">
+            <!-- En-tête du document -->
+            <div class="text-center mb-4">
+                {% if prison.logo %}
+                <img src="{{ prison.logo.url }}" alt="Logo Prison" style="max-height: 100px;" class="mb-3">
+                {% endif %}
+                <h3>{{ detention.prison.name }}</h3>
+                <p class="mb-0">{{ detention.prison.address }}</p>
+                <p>{{ detention.prison.city }}, {{ detention.prison.country }}</p>
+            </div>
+
+            <!-- Numéro de référence -->
+            <div class="text-right mb-4">
+                <p class="text-muted">
+                    Réf: LIB-{{ detention.id }}-{{ detention.end_date|date:"Ymd" }}
+                </p>
+            </div>
+
+            <!-- Contenu principal -->
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="alert alert-info">
+                        <h4 class="alert-heading">Information de libération</h4>
+                        <p class="mb-0">Ce document certifie la libération officielle du détenu mentionné ci-dessous.</p>
+                    </div>
+
+                    <!-- Informations du détenu -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            Informations du détenu
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <table class="table table-bordered">
+                                        <tr>
+                                            <th style="width: 200px;">Nom</th>
+                                            <td>{{ detention.inmate.last_name }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Prénom</th>
+                                            <td>{{ detention.inmate.first_name }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Date de naissance</th>
+                                            <td>{{ detention.inmate.birth_date|date:"d/m/Y" }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Numéro d'écrou</th>
+                                            <td>{{ detention.inmate.registration_number }}</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                                <div class="col-md-4">
+                                    {% if detention.inmate.photo %}
+                                    <img src="{{ detention.inmate.photo.url }}" alt="Photo du détenu"
+                                         class="img-fluid rounded" style="max-height: 200px;">
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Détails de la libération -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            Détails de la libération
+                        </div>
+                        <div class="card-body">
+                            <table class="table table-bordered">
+                                <tr>
+                                    <th style="width: 200px;">Date de libération</th>
+                                    <td>{{ detention.end_date|date:"d/m/Y" }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Heure de libération</th>
+                                    <td>{{ detention.end_date|date:"H:i" }}</td>
+                                </tr>
+                                {% if detention.release_reason %}
+                                <tr>
+                                    <th>Motif de libération</th>
+                                    <td>{{ detention.release_reason }}</td>
+                                </tr>
+                                {% endif %}
+                                <tr>
+                                    <th>Établissement</th>
+                                    <td>{{ detention.prison.name }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Signatures -->
+                    <div class="row mt-5">
+                        <div class="col-md-6 text-center">
+                            <div style="border-top: 1px solid #000; width: 200px; margin: 50px auto 10px;">
+                            </div>
+                            <p>Le Directeur de l'établissement</p>
+                        </div>
+                        <div class="col-md-6 text-center">
+                            <div style="border-top: 1px solid #000; width: 200px; margin: 50px auto 10px;">
+                            </div>
+                            <p>Le Magistrat</p>
+                        </div>
+                    </div>
+
+                    <!-- Cachet officiel -->
+                    <div class="text-right mt-4">
+                        <div style="border: 2px dashed #666; width: 150px; height: 150px;
+                                  border-radius: 50%; margin-left: auto; display: inline-flex;
+                                  align-items: center; justify-content: center; font-style: italic;
+                                  color: #666;">
+                            Cachet officiel
+                        </div>
+                    </div>
+
+                    <!-- QR Code -->
+                    {% if qr_code %}
+                    <div class="position-relative mt-4">
+                        <div style="position: absolute; bottom: 0; right: 0;">
+                            <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code"
+                                 style="width: 100px; height: 100px;">
+                            <p class="text-center"><small>Vérification d'authenticité</small></p>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Pied de page -->
+        <div class="card-footer text-muted">
+            <div class="row">
+                <div class="col-md-6">
+                    Document généré le {{ current_date|date:"d/m/Y à H:i" }}
+                </div>
+                <div class="col-md-6 text-right">
+                    {{ detention.prison.name }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notice légale -->
+    <div class="alert alert-secondary mt-4">
+        <small>
+            Ce document officiel certifie la libération légale du détenu mentionné ci-dessus.
+            Toute falsification ou modification de ce document constitue une infraction pénale.
+            Ce certificat doit être conservé par son titulaire et peut être requis par les autorités compétentes.
+        </small>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    function printReleaseCertificate() {
+        window.print();
+    }
+</script>
+{% endblock %}
+
+{% endblock %}

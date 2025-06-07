@@ -1,0 +1,159 @@
+
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <!-- Statistiques générales -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Total des Détenus</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_inmates }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-users fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Détenus Actifs</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ active_inmates }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-user-lock fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Graphiques -->
+        <div class="col-xl-6 col-lg-7">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Tendance des Incarcérations</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-area">
+                        <canvas id="incarcerationsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Répartition par nationalité -->
+        <div class="col-xl-4 col-lg-5">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Répartition par Nationalité</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-pie pt-4 pb-2">
+                        <canvas id="nationalityChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Répartition par type de délit -->
+        <div class="col-xl-4 col-lg-5">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Types de Délits</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-pie pt-4 pb-2">
+                        <canvas id="offenseChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistiques détaillées -->
+        <div class="col-xl-4 col-lg-5">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Statistiques Détaillées</h6>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm">
+                        <tbody>
+                            <tr>
+                                <td>Âge moyen:</td>
+                                <td>{{ average_age }} ans</td>
+                            </tr>
+                            <tr>
+                                <td>Durée moyenne de détention:</td>
+                                <td>{{ average_detention_time }} mois</td>
+                            </tr>
+                            <tr>
+                                <td>Taux de récidive:</td>
+                                <td>{{ recidivism_rate }}%</td>
+                            </tr>
+                            <tr>
+                                <td>Taux d'occupation:</td>
+                                <td>{{ occupation_rate }}%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Graphique des incarcérations
+const incarcerationCtx = document.getElementById('incarcerationsChart');
+new Chart(incarcerationCtx, {
+    type: 'line',
+    data: {{ incarcerations_data|safe }},
+    options: {
+        maintainAspectRatio: false,
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    }
+});
+
+// Graphique des nationalités
+const nationalityCtx = document.getElementById('nationalityChart');
+new Chart(nationalityCtx, {
+    type: 'pie',
+    data: {{ nationalities_data|safe }},
+    options: {
+        maintainAspectRatio: false
+    }
+});
+
+// Graphique des délits
+const offenseCtx = document.getElementById('offenseChart');
+new Chart(offenseCtx, {
+    type: 'pie',
+    data: {{ offenses_data|safe }},
+    options: {
+        maintainAspectRatio: false
+    }
+});
+</script>
+{% endblock %}

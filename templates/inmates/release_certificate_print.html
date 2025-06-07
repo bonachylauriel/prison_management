@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Certificat de Libération - {{ detention.inmate.first_name }} {{ detention.inmate.last_name }}</title>
+    <style>
+        @media print {
+            @page {
+                size: A4;
+                margin: 2cm;
+            }
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #000;
+            margin: 0;
+            padding: 20px;
+            background-color: white;
+        }
+
+        .watermark {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            font-size: 100px;
+            color: rgba(200, 200, 200, 0.2);
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            border-bottom: 3px double #000;
+            padding-bottom: 20px;
+        }
+
+        .prison-logo {
+            max-width: 150px;
+            margin-bottom: 15px;
+        }
+
+        .prison-name {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .document-title {
+            font-size: 32px;
+            font-weight: bold;
+            margin: 30px 0;
+            text-align: center;
+            text-transform: uppercase;
+            color: #000;
+            border: 3px double #000;
+            padding: 15px;
+            background-color: #f8f8f8;
+        }
+
+        .certificate-content {
+            margin: 40px 0;
+            font-size: 16px;
+            line-height: 1.8;
+            text-align: justify;
+        }
+
+        .inmate-info {
+            margin: 30px 0;
+            padding: 20px;
+            border: 1px solid #000;
+            background-color: #f8f8f8;
+        }
+
+        .inmate-info table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .inmate-info th {
+            text-align: left;
+            width: 200px;
+            padding: 8px;
+        }
+
+        .inmate-info td {
+            padding: 8px;
+        }
+
+        .footer {
+            margin-top: 60px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .signature-section {
+            margin-top: 80px;
+            page-break-inside: avoid;
+        }
+
+        .signature-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-top: 40px;
+        }
+
+        .signature-box {
+            text-align: center;
+        }
+
+        .signature-line {
+            border-top: 1px solid #000;
+            width: 200px;
+            margin: 50px auto 10px;
+        }
+
+        .official-stamp {
+            margin-top: 40px;
+            text-align: right;
+        }
+
+        .stamp-placeholder {
+            border: 2px dashed #666;
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-style: italic;
+            color: #666;
+        }
+
+        .reference-number {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .qr-code {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            border: 1px solid #000;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .legal-notice {
+            margin-top: 40px;
+            font-size: 12px;
+            color: #666;
+            text-align: justify;
+            border-top: 1px solid #ccc;
+            padding-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="watermark">LIBÉRATION</div>
+
+    <div class="reference-number">
+        Réf: LIB-{{ detention.id }}-{{ detention.end_date|date:"Ymd" }}
+    </div>
+
+    <div class="header">
+        {% if prison.logo %}
+        <img src="{{ prison.logo.url }}" alt="Logo Prison" class="prison-logo">
+        {% endif %}
+        <div class="prison-name">{{ detention.prison.name }}</div>
+        <div>{{ detention.prison.address }}</div>
+        <div>{{ detention.prison.city }}, {{ detention.prison.country }}</div>
+    </div>
+
+    <h1 class="document-title">Certificat de Libération</h1>
+
+    <div class="certificate-content">
+        <p>Je soussigné(e), {{ user.get_full_name }}, {{ user.title }}, certifie que :</p>
+
+        <div class="inmate-info">
+            <table>
+                <tr>
+                    <th>Nom :</th>
+                    <td>{{ detention.inmate.last_name }}</td>
+                </tr>
+                <tr>
+                    <th>Prénom :</th>
+                    <td>{{ detention.inmate.first_name }}</td>
+                </tr>
+                <tr>
+                    <th>Date de naissance :</th>
+                    <td>{{ detention.inmate.birth_date|date:"d/m/Y" }}</td>
+                </tr>
+                <tr>
+                    <th>Numéro d'écrou :</th>
+                    <td>{{ detention.inmate.registration_number }}</td>
+                </tr>
+            </table>
+        </div>
+
+        <p>a été légalement libéré(e) de l'établissement pénitentiaire {{ detention.prison.name }}
+           le {{ detention.end_date|date:"d/m/Y" }} à {{ detention.end_date|date:"H:i" }}.</p>
+
+        {% if detention.release_reason %}
+        <p>Motif de la libération : {{ detention.release_reason }}</p>
+        {% endif %}
+
+        <p>Le/la détenu(e) a satisfait à toutes les obligations légales et administratives requises pour sa libération.</p>
+    </div>
+
+    <div class="signature-section">
+        <div class="signature-grid">
+            <div class="signature-box">
+                <div class="signature-line"></div>
+                <p>Le Directeur de l'établissement</p>
+            </div>
+            <div class="signature-box">
+                <div class="signature-line"></div>
+                <p>Le Magistrat</p>
+            </div>
+        </div>
+
+        <div class="official-stamp">
+            <div class="stamp-placeholder">
+                Cachet officiel
+            </div>
+        </div>
+    </div>
+
+    <div class="legal-notice">
+        <p>Ce document officiel certifie la libération légale du détenu mentionné ci-dessus. Toute falsification
+           ou modification de ce document constitue une infraction pénale. Ce certificat doit être conservé par
+           son titulaire et peut être requis par les autorités compétentes.</p>
+    </div>
+
+    <div class="footer">
+        <p>Document émis le {{ current_date|date:"d/m/Y à H:i" }}</p>
+        <p>{{ detention.prison.name }} - {{ detention.prison.address }} - {{ detention.prison.city }}</p>
+    </div>
+
+    <div class="qr-code">
+        [QR Code]<br>
+        <small>Vérification d'authenticité</small>
+    </div>
+</body>
+</html>

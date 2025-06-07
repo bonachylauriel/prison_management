@@ -1,0 +1,225 @@
+
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <!-- Section Profil -->
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="card-title mb-0">
+                        <i class="fas fa-user-tie me-2"></i>Profil du Magistrat
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <div class="avatar-placeholder mb-3">
+                            <i class="fas fa-user-circle fa-5x text-secondary"></i>
+                        </div>
+                        <h3>{{ magistrate.first_name }} {{ magistrate.last_name }}</h3>
+                        <p class="text-muted">{{ magistrate.court_name }}</p>
+                    </div>
+
+                    <div class="contact-info">
+                        <h5 class="border-bottom pb-2">Informations de contact</h5>
+                        <div class="mb-2">
+                            <i class="fas fa-envelope me-2 text-primary"></i>
+                            {{ magistrate.email|default:"Email non renseigné" }}
+                        </div>
+                        <div class="mb-2">
+                            <i class="fas fa-phone me-2 text-primary"></i>
+                            {{ magistrate.phone|default:"Téléphone non renseigné" }}
+                        </div>
+                    </div>
+
+                    <div class="activity-info mt-4">
+                        <h5 class="border-bottom pb-2">Statistiques</h5>
+                        <div class="row text-center">
+                            <div class="col-6 mb-3">
+                                <div class="h4 mb-0">{{ detentions_count }}</div>
+                                <small class="text-muted">Détentions</small>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <div class="h4 mb-0">{{ active_detentions_count }}</div>
+                                <small class="text-muted">Actives</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="actions mt-4">
+                        {% if perms.magistrates.change_magistrate %}
+                        <a href="{% url 'magistrates:magistrate_update' magistrate.pk %}"
+                           class="btn btn-primary w-100 mb-2">
+                            <i class="fas fa-edit me-2"></i>Modifier le profil
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Carte des informations additionnelles -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Informations administratives</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-2">
+                        <small class="text-muted">Date d'enregistrement</small>
+                        <div>{{ magistrate.created_at|date:"d/m/Y" }}</div>
+                    </div>
+                    <div class="mb-2">
+                        <small class="text-muted">Dernière mise à jour</small>
+                        <div>{{ magistrate.updated_at|date:"d/m/Y H:i" }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section Activités -->
+        <div class="col-md-8">
+            <!-- Détentions en cours -->
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                    <h4 class="card-title mb-0">
+                        <i class="fas fa-gavel me-2"></i>Détentions en cours
+                    </h4>
+                    <span class="badge bg-light text-dark">{{ active_detentions_count }}</span>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Détenu</th>
+                                    <th>Prison</th>
+                                    <th>Date début</th>
+                                    <th>Statut</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for detention in active_detentions %}
+                                <tr>
+                                    <td>
+                                        <a href="{% url 'inmates:inmate_detail' detention.inmate.pk %}"
+                                           class="text-decoration-none">
+                                            {{ detention.inmate.first_name }} {{ detention.inmate.last_name }}
+                                        </a>
+                                    </td>
+                                    <td>{{ detention.prison.name }}</td>
+                                    <td>{{ detention.start_date|date:"d/m/Y" }}</td>
+                                    <td>
+                                        <span class="badge bg-success">En cours</span>
+                                    </td>
+                                    <td>
+                                        <a href="#" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center">
+                                        Aucune détention active
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Historique des détentions -->
+            <div class="card">
+                <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
+                    <h4 class="card-title mb-0">
+                        <i class="fas fa-history me-2"></i>Historique des détentions
+                    </h4>
+                    <span class="badge bg-light text-dark">{{ detention_history_count }}</span>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Détenu</th>
+                                    <th>Prison</th>
+                                    <th>Période</th>
+                                    <th>Statut</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for detention in detention_history %}
+                                <tr>
+                                    <td>
+                                        <a href="{% url 'inmates:inmate_detail' detention.inmate.pk %}"
+                                           class="text-decoration-none">
+                                            {{ detention.inmate.first_name }} {{ detention.inmate.last_name }}
+                                        </a>
+                                    </td>
+                                    <td>{{ detention.prison.name }}</td>
+                                    <td>
+                                        {{ detention.start_date|date:"d/m/Y" }} -
+                                        {% if detention.end_date %}
+                                            {{ detention.end_date|date:"d/m/Y" }}
+                                        {% else %}
+                                            En cours
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if detention.end_date %}
+                                            <span class="badge bg-secondary">Terminée</span>
+                                        {% else %}
+                                            <span class="badge bg-success">En cours</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="#" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center">
+                                        Aucun historique de détention
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CSS personnalisé -->
+{% block extra_css %}
+<style>
+    .avatar-placeholder {
+        width: 120px;
+        height: 120px;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #f8f9fa;
+        border-radius: 50%;
+    }
+
+    .contact-info i {
+        width: 20px;
+    }
+
+    .table td {
+        vertical-align: middle;
+    }
+</style>
+{% endblock %}
+{% endblock content %}

@@ -13,7 +13,7 @@
                     {% if user.profile_photo %}
                         <img src="{{ user.profile_photo.url }}" class="rounded-circle img-fluid mb-3" style="width: 150px; height: 150px; object-fit: cover;">
                     {% else %}
-                        <img src="{% static 'img/default-profile.png' %}" class="rounded-circle img-fluid mb-3" style="width: 150px; height: 150px; object-fit: cover;">
+                        <img src="{% static 'img/logo.jpg' %}" class="rounded-circle img-fluid mb-3" style="width: 150px; height: 150px; object-fit: cover;">
                     {% endif %}
                     <h4>{{ user.get_full_name }}</h4>
                     <p class="text-muted">{{ user.get_role_display }}</p>

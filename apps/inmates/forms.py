@@ -6,13 +6,14 @@ from datetime import timedelta
 class InmateForm(forms.ModelForm):
     class Meta:
         model = Inmate
-        fields = ['registration_number', 'first_name', 'last_name', 'date_of_birth',
+        fields = ['registration_number', 'first_name', 'last_name', 'birth_date', 'nationality',
                  'gender', 'photo', 'current_prison', 'admission_date', 'release_date',
                  'health_status', 'is_recidivist', 'crime_description']
         widgets = {
             'date_of_birth': forms.DateInput(attrs={'type': 'date'}),
             'admission_date': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
             'release_date': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
+            'birth_date': forms.DateInput(attrs={'type': 'date'}) ,
         }
 
 class DetentionForm(forms.ModelForm):

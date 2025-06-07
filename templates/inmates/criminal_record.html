@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Casier Judiciaire - {{ inmate.first_name }} {{ inmate.last_name }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h2 class="mb-0">Casier Judiciaire</h2>
+            <div>
+                <a href="{% url 'inmates:criminal_record_pdf' inmate.pk %}" class="btn btn-light">
+                    <i class="fas fa-file-pdf"></i> Télécharger PDF
+                </a>
+                <a href="{% url 'inmates:criminal_record_print' inmate.pk %}" class="btn btn-light" target="_blank">
+                    <i class="fas fa-print"></i> Imprimer
+                </a>
+            </div>
+        </div>
+
+        <div class="card-body">
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <h3 class="h4 mb-3">Informations du détenu</h3>
+                    <table class="table table-bordered">
+                        <tbody>
+                            <tr>
+                                <th style="width: 200px;">Numéro d'écrou</th>
+                                <td>{{ inmate.registration_number }}</td>
+                            </tr>
+                            <tr>
+                                <th>Nom</th>
+                                <td>{{ inmate.last_name }}</td>
+                            </tr>
+                            <tr>
+                                <th>Prénom</th>
+                                <td>{{ inmate.first_name }}</td>
+                            </tr>
+                            <tr>
+                                <th>Date de naissance</th>
+                                <td>{{ inmate.birth_date|date:"d/m/Y" }}</td>
+                            </tr>
+                            <tr>
+                                <th>Nationalité</th>
+                                <td>{{ inmate.nationality }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="col-md-6">
+                    {% if inmate.photo %}
+                    <div class="text-center">
+                        <img src="{{ inmate.photo.url }}" alt="Photo du détenu" class="img-fluid rounded" style="max-height: 200px;">
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <h3 class="h4 mb-3">Historique des détentions</h3>
+                {% if detentions %}
+                <div class="table-responsive">
+                    <table class="table table-striped table-bordered">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th>Prison</th>
+                                <th>Date d'entrée</th>
+                                <th>Date de sortie</th>
+                                <th>Motif</th>
+                                <th>Statut</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for detention in detentions %}
+                            <tr>
+                                <td>{{ detention.prison.name }}</td>
+                                <td>{{ detention.start_date|date:"d/m/Y" }}</td>
+                                <td>
+                                    {% if detention.end_date %}
+                                        {{ detention.end_date|date:"d/m/Y" }}
+                                    {% else %}
+                                        En cours
+                                    {% endif %}
+                                </td>
+                                <td>{{ detention.reason }}</td>
+                                <td>
+                                    {% if detention.end_date %}
+                                        <span class="badge badge-success">Libéré</span>
+                                    {% else %}
+                                        <span class="badge badge-warning">En détention</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-info">
+                    Aucune détention enregistrée pour ce détenu.
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="mt-4">
+                <h3 class="h4 mb-3">Informations complémentaires</h3>
+                <table class="table table-bordered">
+                    <tbody>
+                        <tr>
+                            <th style="width: 200px;">État de santé</th>
+                            <td>{{ inmate.health_status }}</td>
+                        </tr>
+                        <tr>
+                            <th>Récidiviste</th>
+                            <td>
+                                {% if inmate.is_recidivist %}
+                                    <span class="badge badge-danger">Oui</span>
+                                {% else %}
+                                    <span class="badge badge-success">Non</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Description du crime</th>
+                            <td>{{ inmate.crime_description }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card-footer text-muted">
+            <div class="row">
+                <div class="col-md-6">
+                    Document généré le {{ current_date|date:"d/m/Y à H:i" }}
+                </div>
+                <div class="col-md-6 text-right">
+                    Prison : {{ prison.name }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    // Pour la fonction d'impression
+    function printCriminalRecord() {
+        window.print();
+    }
+</script>
+{% endblock %}
+
+{% endblock %}

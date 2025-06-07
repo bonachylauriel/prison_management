@@ -1,10 +1,38 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
-</head>
-<body>
-$END$
-</body>
-</html>
+{% extends "admin/base_site.html" %}
+{% load form_filters %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header">
+            <h2>{{ title|default:"Approbation de la visite" }}</h2>
+        </div>
+        <div class="card-body">
+            <div class="visit-details mb-4">
+                <h3>Détails de la visite</h3>
+                <p><strong>Détenu :</strong> {{ object.inmate }}</p>
+                <p><strong>Visiteur :</strong> {{ object.visitor }}</p>
+                <p><strong>Date :</strong> {{ object.date }}</p>
+                <p><strong>Durée :</strong> {{ object.duration }} minutes</p>
+            </div>
+            <form method="post">
+                {% csrf_token %}
+                {% for field in form %}
+                    <div class="form-group mb-3">
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field|addclass:"form-control" }}
+                        {% if field.help_text %}
+                            <small class="form-text text-muted">{{ field.help_text }}</small>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+                <div class="d-flex justify-content-between mt-4">
+                    <button type="submit" class="btn btn-primary">Valider</button>
+                    <a href="{% url 'inmates:visit_list' %}" class="btn btn-secondary">Retour</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
